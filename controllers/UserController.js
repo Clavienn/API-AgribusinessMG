@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { paginated } from '../utils/paginate.js';
 import jwt from "jsonwebtoken";
 import Utilisateur from "../models/User.js"
 
@@ -67,7 +68,7 @@ const Login = async (req, res) => {
 
 const GetAllUsers = async (req, res) => {
     try {
-        const users = await Utilisateur.find();
+        const users = await paginated(req, res, Utilisateur, {}, Utilisateur.find().select('-motDePasse -password').lean());
         res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ message: "Erreur lors de la récupération des utilisateurs", error });

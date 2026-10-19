@@ -42,4 +42,6 @@ const ResultatCultureSchema = new mongoose.Schema(
   }
 )
 
+ResultatCultureSchema.index({ parcelle: 1 });
+
 export default mongoose.models.ResultatCulture || mongoose.model('ResultatCulture', ResultatCultureSchema)

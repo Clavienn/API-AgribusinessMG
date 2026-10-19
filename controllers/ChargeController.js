@@ -1,4 +1,5 @@
 import Charge from '../models/Charge.js'
+import { paginated } from '../utils/paginate.js';
 import Ferme from '../models/Ferme.js';
 import Parcelle from '../models/Parcelle.js';
 import ActiviteAgricole from '../models/ActiviteAgricole.js';
@@ -38,9 +39,7 @@ export const createCharge = async (req, res) => {
 
 export const getAllCharges = async (req, res) => {
   try {
-    const charges = await Charge.find()
-      .populate('parcelle')
-      .populate('culture')
+    const charges = await paginated(req, res, Charge, {}, Charge.find().populate('parcelle').populate('culture').lean());
     res.status(200).json(charges)
   } catch (error) {
     res.status(500).json({ message: 'Erreur lors de la récupération', error })
@@ -113,10 +112,7 @@ export const getChargeByUser = async (req, res) => {
     if (parcelleIDs.length === 0) return res.json([])
     
     // 3. Récupérer les charges liées aux parcelles
-    const charges = await Charge.find({ parcelle: { $in: parcelleIDs } })
-      .populate('parcelle', 'nomP codeP surfaceP')
-      .populate('culture', 'nom type')
-      .sort({ createdAt: -1 })
+    const charges = await paginated(req, res, Charge, { parcelle: { $in: parcelleIDs } }, Charge.find({ parcelle: { $in: parcelleIDs } }).populate('parcelle', 'nomP codeP surfaceP').populate('culture', 'nom type').sort({ createdAt: -1 }).lean());
         console.log('Charges trouvées:', charges); // Debug
     res.status(200).json(charges)
   } catch (error) {

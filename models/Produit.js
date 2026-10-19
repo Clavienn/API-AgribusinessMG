@@ -56,6 +56,8 @@ const ProduitSchema = new mongoose.Schema(
   }
 );
 
+ProduitSchema.index({ vendeurId: 1 });
+
 const Produit =
   mongoose.models.Produit || mongoose.model('Produit', ProduitSchema);
 

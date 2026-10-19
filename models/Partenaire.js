@@ -48,6 +48,8 @@ const PartenaireSchema = new mongoose.Schema(
   }
 );
 
+PartenaireSchema.index({ status: 1, createdAt: -1 });
+
 const Partenaire = mongoose.models.Partenaire || mongoose.model('Partenaire', PartenaireSchema);
 
 export default Partenaire;

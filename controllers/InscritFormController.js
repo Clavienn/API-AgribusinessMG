@@ -1,4 +1,5 @@
 import InscritForm from "../models/InscritFormation.js";
+import { paginated } from '../utils/paginate.js';
 import Formation from "../models/Formation.js";
 import { Parser as Json2csvParser } from 'json2csv';
 import excelJS from 'exceljs';
@@ -45,9 +46,7 @@ export const InscriptionFormation = async (req, res) => {
 
 export const GetAllInscritFormations = async (req, res) => {
   try {
-    const inscritformations = await InscritForm.find()
-      .populate('idFormation')
-      .populate('idUtilisateur', 'nom email tel');
+    const inscritformations = await paginated(req, res, InscritForm, {}, InscritForm.find().populate('idFormation').populate('idUtilisateur', 'nom email tel').lean());
 
     res.status(200).json(inscritformations);
   } catch (error) {
@@ -62,9 +61,7 @@ export const GetInscritsForFormateur = async (req, res) => {
     const formations = await Formation.find({ id_formateur: idFormateur });
     const formationIds = formations.map(f => f._id);
 
-    const inscriptions = await InscritForm.find({ idFormation: { $in: formationIds } })
-      .populate('idUtilisateur', 'nom email tel')
-      .populate('idFormation', 'titre dateFormation');
+    const inscriptions = await paginated(req, res, InscritForm, { idFormation: { $in: formationIds } }, InscritForm.find({ idFormation: { $in: formationIds } }).populate('idUtilisateur', 'nom email tel').populate('idFormation', 'titre dateFormation').lean());
 
     res.status(200).json(inscriptions);
   } catch (error) {
@@ -123,10 +120,7 @@ export const getInscriptions = async (req, res) => {
       query.idFormation = { $in: formationIds };
     }
 
-    const inscriptions = await InscritForm.find(query)
-      .populate('idUtilisateur', 'nom email compte role')
-      .populate('idFormation', 'titre dateFormation domaine')
-      .sort({ createdAt: -1 });
+    const inscriptions = await paginated(req, res, InscritForm, query, InscritForm.find(query).populate('idUtilisateur', 'nom email compte role').populate('idFormation', 'titre dateFormation domaine').sort({ createdAt: -1 }).lean());
 
     res.status(200).json(inscriptions);
   } catch (error) {

@@ -59,4 +59,6 @@ const traitementSchema = new mongoose.Schema({
 });
 
 
+traitementSchema.index({ parcelle: 1 });
+
 export default mongoose.model('Traitement', traitementSchema);

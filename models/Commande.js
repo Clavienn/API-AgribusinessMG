@@ -73,5 +73,9 @@ function arrayLimit(val) {
   return val.length > 0;
 }
 
+CommandeSchema.index({ idClient: 1 });
+CommandeSchema.index({ 'detail.idProduit': 1 });
+CommandeSchema.index({ createdAt: -1 });
+
 const Commande = mongoose.models.Commande || mongoose.model('Commande', CommandeSchema);
 export default Commande;

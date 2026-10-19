@@ -5,8 +5,11 @@ const connectMongo = async () => {
 
   try {
     await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
       connectTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 10000,
+      maxPoolSize: 20,
+      minPoolSize: 2,
+      compressors: ['zlib'],
     });
     console.log("MongoDB connected");
   } catch (err) {

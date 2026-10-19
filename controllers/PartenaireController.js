@@ -1,4 +1,5 @@
 import Partenaire from '../models/Partenaire.js';
+import { paginated } from '../utils/paginate.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -30,7 +31,7 @@ export const createPartenaire = async (req, res) => {
 
 export const getAllPartenaires = async (req, res) => {
   try {
-    const partenaires = await Partenaire.find().sort({ createdAt: -1 });
+    const partenaires = await paginated(req, res, Partenaire, {}, Partenaire.find().sort({ createdAt: -1 }).lean());
     res.status(200).json(partenaires);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -40,7 +41,7 @@ export const getAllPartenaires = async (req, res) => {
 
 export const getAllPartenaireActif = async (req, res) => {
   try {
-    const partenaires = await Partenaire.find({status: "Actif"}).sort({ createdAt: -1 });
+    const partenaires = await paginated(req, res, Partenaire, { status: "Actif" }, Partenaire.find({status: "Actif"}).sort({ createdAt: -1 }).lean());
     res.status(200).json(partenaires);
   } catch (error) {
     res.status(500).json({ message: error.message });

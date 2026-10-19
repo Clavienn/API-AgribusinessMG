@@ -1,5 +1,6 @@
 
 import Excel from "../models/Excel.js";
+import { paginated } from '../utils/paginate.js';
 import fs from "fs";
 import path from "path";
 
@@ -59,7 +60,7 @@ export const updateExcel = async (req, res) => {
 
 export const listExcels = async (req, res) => {
   try {
-    const excels = await Excel.find().sort({ createdAt: -1 });
+    const excels = await paginated(req, res, Excel, {}, Excel.find().sort({ createdAt: -1 }).lean());
         // console.log(excels);
 
     res.status(200).json({ excels });

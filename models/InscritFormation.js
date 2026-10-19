@@ -51,6 +51,9 @@ const InscritFormSchema = new mongoose.Schema(
   }
 );
 
+InscritFormSchema.index({ idFormation: 1 });
+InscritFormSchema.index({ idUtilisateur: 1, idFormation: 1 });
+
 const InscritForm =
   mongoose.models.InscritForm || mongoose.model('InscritForm', InscritFormSchema);
 
