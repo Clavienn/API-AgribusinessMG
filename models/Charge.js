@@ -42,4 +42,6 @@ const ChargeSchema = new mongoose.Schema(
   }
 )
 
+ChargeSchema.index({ parcelle: 1 });
+
 export default mongoose.models.Charge || mongoose.model('Charge', ChargeSchema)

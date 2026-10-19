@@ -1,4 +1,5 @@
 import Formation from "../models/Formation.js";
+import { paginated } from '../utils/paginate.js';
 
 
 export const CreateFormation = async (req, res) => {
@@ -35,7 +36,7 @@ export const CreateFormation = async (req, res) => {
 
 export const GetAllFormations = async (req, res) => {
   try {
-    const formations = await Formation.find().populate('id_formateur', 'nom email');
+    const formations = await paginated(req, res, Formation, {}, Formation.find().populate('id_formateur', 'nom email').lean());
     res.status(200).json(formations);
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur", error: error.message });

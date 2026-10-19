@@ -1,4 +1,5 @@
 import Traitement from '../models/Traitement.js'
+import { paginated } from '../utils/paginate.js';
 import Ferme from '../models/Ferme.js'
 import Parcelle from '../models/Parcelle.js'
 import StockIntrant from '../models/IntrantStock.js';
@@ -49,9 +50,7 @@ export const createTraitement = async (req, res) => {
 // Lister tous les traitements
 export const getAllTraitements = async (req, res) => {
   try {
-    const traitements = await Traitement.find()
-      .populate('parcelle')
-      .populate('produit');
+    const traitements = await paginated(req, res, Traitement, {}, Traitement.find().populate('parcelle').populate('produit').lean());
     res.status(200).json(traitements);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -108,10 +107,7 @@ export const getTraitementsByUser = async (req, res) => {
     const parcelleIDs = (await Parcelle.find({ fermeID: { $in: fermeIDs } }).select('_id')).map(p => p._id);
     if (parcelleIDs.length === 0) return res.json([]);
 
-    const traitements = await Traitement.find({ parcelle: { $in: parcelleIDs } })
-      .populate('parcelle', 'nomP codeP')
-      .populate('produit', 'nom type')
-      .sort({ createdAt: -1 });
+    const traitements = await paginated(req, res, Traitement, { parcelle: { $in: parcelleIDs } }, Traitement.find({ parcelle: { $in: parcelleIDs } }).populate('parcelle', 'nomP codeP').populate('produit', 'nom type').sort({ createdAt: -1 }).lean());
 
     return res.json(traitements);
   } catch (error) {

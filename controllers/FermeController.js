@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { paginated } from '../utils/paginate.js';
 import Ferme from "../models/Ferme.js";
 import Parcelle from "../models/Parcelle.js";
 import ActiviteAgricole from "../models/ActiviteAgricole.js";
@@ -113,7 +114,7 @@ export const CreateFerme = async (req, res) => {
 
 export const GetAllFermes = async (req, res) => {
   try {
-    const fermes = await Ferme.find().sort({ createdAt:-1 });
+    const fermes = await paginated(req, res, Ferme, {}, Ferme.find().sort({ createdAt:-1 }).lean());
     res.status(200).json(fermes);
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur", error: error.message });
@@ -123,7 +124,7 @@ export const GetAllFermes = async (req, res) => {
 
 export const GetAllFermesUser = async (req, res) => {
   try {
-    const fermes = await Ferme.find({ userID: req.user.userId });
+    const fermes = await paginated(req, res, Ferme, { userID: req.user.userId }, Ferme.find({ userID: req.user.userId }).lean());
     res.status(200).json(fermes);
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur", error: error.message });

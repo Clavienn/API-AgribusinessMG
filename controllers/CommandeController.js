@@ -1,4 +1,5 @@
 import Commande from '../models/Commande.js';
+import { paginated } from '../utils/paginate.js';
 import Produit from '../models/Produit.js';
 
 
@@ -31,7 +32,7 @@ export const CreateCommande = async (req, res) => {
 
 export const GetAllCommandes = async (req, res) => {
   try {
-    const commandes = await Commande.find().populate('idClient', 'nom tel email').populate('detail.idProduit', 'design');
+    const commandes = await paginated(req, res, Commande, {}, Commande.find().populate('idClient', 'nom tel email').populate('detail.idProduit', 'design').sort({ createdAt: -1 }).lean());
     res.status(200).json(commandes);
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur", error: error.message });
@@ -55,7 +56,7 @@ export const GetCommandesByVendeur = async (req, res) => {
     const vendeurId = req.user.userId;
     // console.log(vendeurId);
     
-    const produitsVendeur = await Produit.find({ vendeurId: vendeurId }).select('_id');
+    const produitsVendeur = await Produit.find({ vendeurId: vendeurId }).select('_id').lean();
 
     if (!produitsVendeur.length) {
       return res.status(404).json({ message: "Aucun produit publié par ce vendeur. " });
@@ -63,11 +64,11 @@ export const GetCommandesByVendeur = async (req, res) => {
 
     const produitsIds = produitsVendeur.map(p => p._id);
 
-    const commandes = await Commande.find({
+    const commandes = await paginated(req, res, Commande, {
       'detail.idProduit': { $in: produitsIds }
-    })
-      .populate('idClient', 'nom email tel')
-      .populate('detail.idProduit', 'design vendeurId');
+    }, Commande.find({
+      'detail.idProduit': { $in: produitsIds }
+    }).populate('idClient', 'nom email tel').populate('detail.idProduit', 'design vendeurId').lean());
 
     res.status(200).json(commandes);
 

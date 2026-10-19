@@ -1,4 +1,5 @@
 import Parcelle from '../models/Parcelle.js';
+import { paginated } from '../utils/paginate.js';
 import Ferme from '../models/Ferme.js';
 
 
@@ -41,7 +42,7 @@ export const createParcelle = async (req, res) => {
 
 export const getAllParcelles = async (req, res) => {
   try {
-    const parcelles = await Parcelle.find().populate('fermeID');
+    const parcelles = await paginated(req, res, Parcelle, {}, Parcelle.find().populate('fermeID').lean());
     res.status(200).json(parcelles);
   } catch (err) {
     res.status(500).json({ message: 'Erreur lors de la récupération des parcelles', error: err.message });
@@ -57,7 +58,8 @@ export const getParcellesForCurrentUser = async (req, res) => {
       return res.status(404).json({ message: 'Aucune ferme trouvée pour cet utilisateur.' });
     }
     const fermeIDs = fermes.map(ferme => ferme._id);
-    const parcelles = await Parcelle.find({ fermeID: { $in: fermeIDs } }).populate('fermeID');
+    const filtre = { fermeID: { $in: fermeIDs } };
+    const parcelles = await paginated(req, res, Parcelle, filtre, Parcelle.find(filtre).populate('fermeID').lean());
 
     return res.status(200).json(parcelles);
   } catch (err) {
@@ -84,7 +86,7 @@ export const getParcelleById = async (req, res) => {
 export const getParcelleByFermeId = async (req, res) => {
   try {
     const { fermeID } = req.params;
-    const parcelles = await Parcelle.find({ fermeID }).populate('fermeID');
+    const parcelles = await paginated(req, res, Parcelle, { fermeID }, Parcelle.find({ fermeID }).populate('fermeID').lean());
 
     if (!parcelles || parcelles.length === 0) {
       return res.status(404).json({ message: 'Aucune parcelle trouvée pour cette ferme' });

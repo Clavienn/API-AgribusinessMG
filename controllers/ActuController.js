@@ -1,4 +1,5 @@
 import Actualite from "../models/Actualite.js";
+import { paginated } from '../utils/paginate.js';
 
 
 const CreateActualite = async (req, res) => {
@@ -29,7 +30,7 @@ const CreateActualite = async (req, res) => {
 
 const GetAllActualites = async (req, res) => {
   try {
-    const actualites = await Actualite.find().sort({ createdAt: -1 });
+    const actualites = await paginated(req, res, Actualite, {}, Actualite.find().sort({ createdAt: -1 }).lean());
     res.status(200).json(actualites);
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de la récupération des actualités", error: error.message });
@@ -39,7 +40,7 @@ const GetAllActualites = async (req, res) => {
 const GetAllActualiteApproved = async (req, res) => {
   try {
     // On récupère toutes les actualités avec approbation "oui", triées par date de création décroissante
-    const actualites = await Actualite.find({ approbation: "oui" }).sort({ createdAt: -1 });
+    const actualites = await paginated(req, res, Actualite, { approbation: "oui" }, Actualite.find({ approbation: "oui" }).sort({ createdAt: -1 }).lean());
 
     // Si aucune actualité n'est trouvée, renvoyer un tableau vide (optionnel)
     res.status(200).json(actualites);

@@ -1,4 +1,5 @@
 import StockIntrant from "../models/IntrantStock.js";
+import { paginated } from '../utils/paginate.js';
 import Parcelle from "../models/Parcelle.js";
 import Ferme from "../models/Ferme.js";
 import Intrant from '../models/Intrant.js';
@@ -26,9 +27,7 @@ export const createStockIntrant = async (req, res) => {
 // Récupérer tous les stocks d'intrants
 export const getAllStockIntrants = async (req, res) => {
   try {
-    const stocks = await StockIntrant.find()
-      .populate('parcelle')
-      .populate('intrant');
+    const stocks = await paginated(req, res, StockIntrant, {}, StockIntrant.find().populate('parcelle').populate('intrant').lean());
     res.status(200).json(stocks);
   } catch (error) {
     console.error("Erreur lors de la récupération des stocks :", error);
@@ -64,10 +63,7 @@ export const getStockIntrantByUser = async (req, res) => {
     if (parcelleIDs.length === 0) return res.json([]);
 
     // 3. Récupérer les stocks liés aux parcelles trouvées
-    const stocks = await StockIntrant.find({ parcelle: { $in: parcelleIDs } })
-      .populate('parcelle', 'nomP surfaceP') // nom & surface de la parcelle
-      .populate('intrant', 'nom type categorie description unite prixUnitaire fournisseur composition') // toutes les infos intrant
-      .sort({ createdAt: -1 });
+    const stocks = await paginated(req, res, StockIntrant, { parcelle: { $in: parcelleIDs } }, StockIntrant.find({ parcelle: { $in: parcelleIDs } }).populate('parcelle', 'nomP surfaceP').populate('intrant', 'nom type categorie description unite prixUnitaire fournisseur composition').sort({ createdAt: -1 }).lean());
 
     res.json(stocks);
   } catch (error) {

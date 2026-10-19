@@ -1,4 +1,5 @@
 import Plante from "../models/Plante.js";
+import { paginated } from '../utils/paginate.js';
 
 
 export const createPlante = async (req, res) => {
@@ -18,7 +19,7 @@ export const createPlante = async (req, res) => {
 
 export const getPlantes = async (req, res) => {
   try {
-    const plantes = await Plante.find();
+    const plantes = await paginated(req, res, Plante, {}, Plante.find().lean());
     res.status(200).json({ success: true, data: plantes });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

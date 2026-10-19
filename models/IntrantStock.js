@@ -16,4 +16,6 @@ const StockIntrantSchema = new mongoose.Schema({
   quantiteUtilisee: { type: Number, default: 0, min: 0 },
 }, { timestamps: true });
 
+StockIntrantSchema.index({ parcelle: 1 });
+
 export default mongoose.model('StockIntrant', StockIntrantSchema);

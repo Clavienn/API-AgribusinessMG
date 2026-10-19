@@ -1,38 +1,52 @@
 import Parcelle from '../models/Parcelle.js';
 import StockIntrant from '../models/IntrantStock.js';
-import Intrant from '../models/Intrant.js';
 
 import Traitement from '../models/Traitement.js';
 import Culture from '../models/ActiviteAgricole.js';
+
+const groupBy = (docs, key) => {
+  const map = new Map();
+  for (const d of docs) {
+    const k = String(d[key]?._id ?? d[key]);
+    if (!map.has(k)) map.set(k, []);
+    map.get(k).push(d);
+  }
+  return map;
+};
 
 export const getRapportParParcelle = async (req, res) => {
   const { fermeID } = req.params;
 
   try {
     // 1. Récupérer toutes les parcelles de la ferme
-    const parcelles = await Parcelle.find({ fermeID });
+    const parcelles = await Parcelle.find({ fermeID }).lean();
+    const ids = parcelles.map((p) => p._id);
 
-    const rapport = await Promise.all(
-      parcelles.map(async (parcelle) => {
-        // 2. Récupérer les stocks d'intrants avec toutes les infos intrant
-        const intrants = await StockIntrant.find({ parcelle: parcelle._id })
-          .populate('parcelle', 'nomP surfaceP codeP') // infos parcelle
-          .populate('intrant'); // toutes les infos du modèle Intrant
+    // 2-4. Une seule requête par collection (au lieu de 3 par parcelle)
+    const [intrants, traitements, cultures] = await Promise.all([
+      StockIntrant.find({ parcelle: { $in: ids } })
+        .populate('parcelle', 'nomP surfaceP codeP')
+        .populate('intrant')
+        .lean(),
+      Traitement.find({ parcelle: { $in: ids } })
+        .populate('produit', 'nom type')
+        .lean(),
+      Culture.find({ idParcelle: { $in: ids } }).lean(),
+    ]);
 
-        // 3. Récupérer les traitements liés à cette parcelle
-        const traitements = await Traitement.find({ parcelle: parcelle._id })
-          .populate('produit', 'nom type'); // infos produit utilisé
-        // 4. Récupérer les cultures liées à cette parcelle
-        const cultures = await Culture.find({ idParcelle: parcelle._id });
+    const intrantsBy = groupBy(intrants, 'parcelle');
+    const traitementsBy = groupBy(traitements, 'parcelle');
+    const culturesBy = groupBy(cultures, 'idParcelle');
 
-        return {
-          parcelle,
-          intrants,
-          traitements,
-          cultures
-        };
-      })
-    );
+    const rapport = parcelles.map((parcelle) => {
+      const k = String(parcelle._id);
+      return {
+        parcelle,
+        intrants: intrantsBy.get(k) || [],
+        traitements: traitementsBy.get(k) || [],
+        cultures: culturesBy.get(k) || [],
+      };
+    });
 
     return res.status(200).json(rapport);
 

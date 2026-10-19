@@ -66,5 +66,7 @@ const FormationSchema = new mongoose.Schema(
   }
 );
 
+FormationSchema.index({ id_formateur: 1 });
+
 const Formation = mongoose.models.Formation || mongoose.model('Formation', FormationSchema);
 export default Formation;

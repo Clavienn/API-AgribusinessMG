@@ -1,4 +1,5 @@
 import Produit from "../models/Produit.js";
+import { paginated } from '../utils/paginate.js';
 import path from "path";
 import fs from "fs";
 
@@ -42,7 +43,7 @@ export const CreateProduit = async (req, res) => {
 
 export const GetAllProduits = async (req, res) => {
   try {
-    const produits = await Produit.find().populate('vendeurId', 'nom email');
+    const produits = await paginated(req, res, Produit, {}, Produit.find().populate('vendeurId', 'nom email').lean());
     res.status(200).json(produits);
   } catch (error) {
     res.status(500).json({ message: "Erreur serveur", error: error.message });

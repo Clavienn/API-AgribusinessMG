@@ -1,4 +1,5 @@
 import User from '../models/User.js'
+import { paginated } from '../utils/paginate.js';
 import RoleRequest from '../models/RoleRequest.js'
 
 // Créer une demande de changement de rôle
@@ -90,9 +91,7 @@ const demandeChangeRole = async (req, res) => {
 
 const listRoleRequests = async (req, res) => {
   try {
-    const requests = await RoleRequest.find()
-      .populate("userId", "nom email role")
-      .sort({ requestDate: -1 });
+    const requests = await paginated(req, res, RoleRequest, {}, RoleRequest.find().populate("userId", "nom email role").sort({ requestDate: -1 }).lean());
 
     res.status(200).json({
       success: true,

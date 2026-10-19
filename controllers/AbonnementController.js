@@ -1,4 +1,5 @@
 import Abonne from '../models/Abonner.js';
+import { paginated } from '../utils/paginate.js';
 import Utilisateur from '../models/User.js';
 
 export const createAbonne = async (req, res) => {
@@ -39,7 +40,7 @@ export const createAbonne = async (req, res) => {
 
 export const getAllAbonnes = async (req, res) => {
   try {
-    const abonnes = await Abonne.find().sort({ createdAt: -1 });
+    const abonnes = await paginated(req, res, Abonne, {}, Abonne.find().sort({ createdAt: -1 }).lean());
     res.status(200).json(abonnes);
   } catch (error) {
     console.error('Erreur récupération abonnés:', error);

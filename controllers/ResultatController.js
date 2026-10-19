@@ -1,4 +1,5 @@
 import ResultatCulture from '../models/Resultat.js';
+import { paginated } from '../utils/paginate.js';
 import Ferme from '../models/Ferme.js';
 import Parcelle from '../models/Parcelle.js';
 
@@ -16,9 +17,7 @@ export const createResultatCulture = async (req, res) => {
 // 📌 Obtenir tous les résultats de culture
 export const getResultatsCulture = async (req, res) => {
   try {
-    const resultats = await ResultatCulture.find()
-      .populate('idParcelle', 'nomP codeP surfaceP')
-      .sort({ createdAt: -1 });
+    const resultats = await paginated(req, res, ResultatCulture, {}, ResultatCulture.find().populate('idParcelle', 'nomP codeP surfaceP').sort({ createdAt: -1 }).lean());
     res.status(200).json(resultats);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -44,9 +43,7 @@ export const getResultByUser = async (req, res) => {
 
     if (parcelleIDs.length === 0) return res.json([]);
 
-    const resultats = await ResultatCulture.find({ parcelle: { $in: parcelleIDs } })
-      .populate('parcelle', 'nomP codeP surfaceP')
-      .sort({ dateSemis: -1 });
+    const resultats = await paginated(req, res, ResultatCulture, { parcelle: { $in: parcelleIDs } }, ResultatCulture.find({ parcelle: { $in: parcelleIDs } }).populate('parcelle', 'nomP codeP surfaceP').sort({ dateSemis: -1 }).lean());
 
     return res.json(resultats);
   } catch (error) {

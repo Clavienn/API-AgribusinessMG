@@ -44,6 +44,8 @@ const ActualiteSchema = new mongoose.Schema(
   }
 );
 
+ActualiteSchema.index({ approbation: 1, createdAt: -1 });
+
 const Actualite = mongoose.models.Actualite || mongoose.model('Actualite', ActualiteSchema);
 
 export default Actualite;

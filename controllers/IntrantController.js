@@ -1,4 +1,5 @@
 import Intrant from '../models/Intrant.js';
+import { paginated } from '../utils/paginate.js';
 import Ferme from '../models/Ferme.js';
 import Parcelle from '../models/Parcelle.js';
 
@@ -18,7 +19,7 @@ export const createIntrant = async (req, res) => {
 
 export const getAllIntrants = async (req, res) => {
   try {
-    const intrants = await Intrant.find({})
+    const intrants = await paginated(req, res, Intrant, {}, Intrant.find({}).lean());
     res.json(intrants);
   } catch (error) {
     console.error("Erreur récupération de tous les intrants :", error);
@@ -83,9 +84,7 @@ export const getIntrantsByUser = async (req, res) => {
     if (parcelleIDs.length === 0) return res.json([]);
 
     // 3. Trouver les intrants liés à ces parcelles
-    const intrants = await Intrant.find({ idParcelle: { $in: parcelleIDs } })
-      .populate('idParcelle', 'nomP codeP surfaceP')
-      .sort({ createdAt: -1 });
+    const intrants = await paginated(req, res, Intrant, { idParcelle: { $in: parcelleIDs } }, Intrant.find({ idParcelle: { $in: parcelleIDs } }).populate('idParcelle', 'nomP codeP surfaceP').sort({ createdAt: -1 }).lean());
 
     res.json(intrants);
   } catch (error) {

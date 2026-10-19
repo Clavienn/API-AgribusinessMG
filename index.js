@@ -1,8 +1,11 @@
 import express from "express"
 import cors from 'cors';
+import compression from 'compression';
 import dotenv from 'dotenv';
 dotenv.config();
 import connectMongo from "./utils/db.js";
+
+
 import user from "./routes/user.js"
 import actualite from './routes/actualite.js'
 import formation from './routes/formation.js'
@@ -33,7 +36,9 @@ import stock from "./routes/stock.js"
 connectMongo()
 const app = express()
 const PORT = process.env.PORT || 5000;
-app.use(cors());
+app.disable('x-powered-by');
+app.use(compression());
+app.use(cors({ exposedHeaders: ['X-Total-Count', 'X-Page', 'X-Limit', 'X-Total-Pages'] }));
 app.use(express.json());
 
 
@@ -60,7 +65,7 @@ app.use("/api/intrant-stock",stock)
 app.use("/api/traitement",Traitement)
 app.use("/api/rapport",rapport)
 app.use("/api/charge",charge)
-app.use('/api/uploads', express.static(path.join(process.cwd(), 'uploads')));
+app.use('/api/uploads', express.static(path.join(process.cwd(), 'uploads'), { maxAge: '7d', etag: true }));
 app.use("/api/fiches",fiche)
 app.use("/api/resultat",resultatReel)
 app.use("/api/excel",excel)

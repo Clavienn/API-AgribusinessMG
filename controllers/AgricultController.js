@@ -1,4 +1,5 @@
 import ActiviteAgricole from '../models/ActiviteAgricole.js';
+import { paginated } from '../utils/paginate.js';
 import Parcelle from '../models/Parcelle.js';
 import Ferme from '../models/Ferme.js';
 
@@ -19,9 +20,7 @@ export const createActivite = async (req, res) => {
 
 export const getAllActivites = async (req, res) => {
   try {
-    const activites = await ActiviteAgricole.find()
-      .populate('idParcelle')
-      .sort({ createdAt: -1 });
+    const activites = await paginated(req, res, ActiviteAgricole, {}, ActiviteAgricole.find().populate('idParcelle').sort({ createdAt: -1 }).lean());
 
     res.status(200).json(activites);
   } catch (error) {
@@ -47,9 +46,7 @@ export const getActivitesByUser = async (req, res) => {
 
     if (parcelleIDs.length === 0) return res.json([]);
 
-    const cultures = await ActiviteAgricole.find({ idParcelle: { $in: parcelleIDs } })
-      .populate('idParcelle', 'nomP codeP surfaceP')
-      .sort({ dateSemis: -1 });
+    const cultures = await paginated(req, res, ActiviteAgricole, { idParcelle: { $in: parcelleIDs } }, ActiviteAgricole.find({ idParcelle: { $in: parcelleIDs } }).populate('idParcelle', 'nomP codeP surfaceP').sort({ dateSemis: -1 }).lean());
 
     return res.json(cultures);
 
